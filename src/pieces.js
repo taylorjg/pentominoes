@@ -1,19 +1,21 @@
 import * as R from 'ramda'
 import { pieceDescriptions } from './pieceDescriptions'
 
-function* listOfCoords(description) {
-  const rows = description.length
-  const cols = description[0].length
+function* listOfCoords(pattern) {
+  const rows = pattern.length
+  const cols = pattern[0].length
   for (const row of R.range(0, rows)) {
     for (const col of R.range(0, cols)) {
-      if (description[row][col] === 'X') {
-        yield { row, col }
+      if (pattern[row][col] === 'X') {
+        yield { x: col, y: row }
       }
     }
   }
 }
 
-const descriptionToListOfCoords = description =>
-  Array.from(listOfCoords(description))
+const descriptionToPiece = ({ label, pattern }) => ({
+  label,
+  coords: Array.from(listOfCoords(pattern))
+})
 
-export const pieces = pieceDescriptions.map(descriptionToListOfCoords)
+export const pieces = pieceDescriptions.map(descriptionToPiece)

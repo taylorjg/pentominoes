@@ -1,13 +1,10 @@
-// import * as D from 'dlxlib'
 import { pieces } from './pieces'
 
-for (const piece of pieces) {
-  console.log(JSON.stringify(piece.map(({row, col}) => `(${row}, ${col})`)))
-}
+const formatCoords = ({ x, y }) => `(${x}, ${y})`
 
-// describe each piece
-// F I L P N T U V W X Y Z
-// coords list for each piece
+for (const { label, coords } of pieces) {
+  console.log(`label: ${label}; coords: ${JSON.stringify(coords.map(formatCoords))}`)
+}
 
 // function to draw a solution using SVG
 

@@ -74,4 +74,7 @@ const Z = [
   ' XX'
 ]
 
-export const pieceDescriptions = [F, I, L, P, N, T, U, V, W, X, Y, Z]
+export const pieceDescriptions =
+  Object.entries({ F, I, L, P, N, T, U, V, W, X, Y, Z })
+    .map(([label, pattern]) => ({ label, pattern }))
+
