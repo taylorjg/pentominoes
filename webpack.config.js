@@ -1,18 +1,19 @@
 const path = require('path')
-const { version } = require('./package.json')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const { version } = require('./package.json')
 
 const distFolder = path.join(__dirname, 'dist')
 
 module.exports = {
   mode: 'development',
   entry: [
+    '@babel/polyfill',
     './src/index.js'
   ],
   output: {
     path: distFolder,
-    filename: 'bundle.js',
+    filename: 'bundle.js'
   },
   plugins: [
     new CopyWebpackPlugin([
