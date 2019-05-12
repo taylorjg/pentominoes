@@ -1,6 +1,8 @@
-import { pieces } from './pieces'
-console.dir(pieces)
+import { solve} from './solve'
 
-// build matrix
-// solve matrix
-// draw each solution using SVG
+const { rows, solutions } = solve()
+const firstSolution = solutions[0]
+firstSolution.forEach(index => {
+  const row = rows[index]
+  console.log(`${row.piece.label} ${row.rotation.orientation} ${JSON.stringify(row.rotation.coords)}`)
+})
