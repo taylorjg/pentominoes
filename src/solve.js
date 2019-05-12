@@ -1,4 +1,4 @@
-import * as D from 'dlxlib'
+import * as dlxlib from 'dlxlib'
 import * as R from 'ramda'
 import { pieces } from './pieces'
 
@@ -64,10 +64,22 @@ const buildMatrix = rows =>
     return R.concat(pieceColumns, locationColumns)
   })
 
-export const solve = () => {
+const dumpSolution = rows => solution => {
+  solution.forEach(rowIndex => {
+    const row = rows[rowIndex]
+    const label = `label: ${row.piece.label}`
+    const location = `location: ${JSON.stringify(row.location)}`
+    const orientation = `orientation: ${row.rotation.orientation}`
+    const coords = `coords: ${JSON.stringify(row.rotation.coords)}`
+    console.log([label, location, orientation, coords].join('; '))
+  })
+  console.log('-'.repeat(80))
+}
+
+export const solve = solutionCount => {
   const rows = buildRows()
   const matrix = buildMatrix(rows)
   console.log(`matrix.length: ${matrix.length}`)
-  const solutions = D.solve(matrix, undefined, undefined, 1)
+  const solutions = dlxlib.solve(matrix, undefined, dumpSolution(rows), solutionCount)
   return { rows, solutions }
 }
