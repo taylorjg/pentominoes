@@ -13,7 +13,7 @@
   * ~~Ignore solutions that are merely rotations or transpositions of other solutions~~
 * Display the solutions in a grid
   * Make the grid responsive
-* Use a web worker to do the solving ?
+* ~~Do the solving using a web worker~~
 
 # Links
 

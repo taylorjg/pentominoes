@@ -1,3 +1,4 @@
+import '@babel/polyfill'
 import * as dlxlib from 'dlxlib'
 import * as R from 'ramda'
 import { pieces } from './pieces'
@@ -69,22 +70,15 @@ const buildMatrix = rows =>
     return R.concat(pieceColumns, locationColumns)
   })
 
-// const dumpSolution = (rows, solution) => {
-//   const formattedSolution = formatSolution(rows, solution)
-//   formattedSolution.forEach(line => console.log(line))
-//   console.log('-'.repeat(80))
-// }
-
-export const solve = onSolutionFound => {
+const solve = () => {
   const rows = buildRows()
   const matrix = buildMatrix(rows)
-  console.log(`matrix.length: ${matrix.length}`)
+  console.log(`[solve] matrix.length: ${matrix.length}`)
   const solutions = dlxlib.solve(
     matrix,
     undefined,
-    solution => {
-      // dumpSolution(rows, solution)
-      onSolutionFound(rows, solution)
-    })
-  return { rows, solutions }
+    solution => postMessage({ message: 'solutionFound', rows, solution }))
+  postMessage({ message: 'done', solutions })
 }
+
+solve()

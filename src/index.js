@@ -1,6 +1,5 @@
 import * as R from 'ramda'
 import * as M from './manipulations'
-import { solve } from './solve'
 import { drawSolution } from './svg'
 
 const formatSolution = (rows, solution) => {
@@ -46,17 +45,28 @@ const isSolutionUnique = (rows, solution) => {
   return R.intersection(joinedGrids, uniqueJoinedGrids).length === 0
 }
 
-const { solutions } = solve((rows, solution) => {
-  if (isSolutionUnique(rows, solution)) {
-    const formattedSolution = formatSolution(rows, solution)
-    const joinedGrid = formattedSolution.join('|')
-    uniqueSolutions.push(solution)
-    uniqueJoinedGrids.push(joinedGrid)
-    formattedSolution.forEach(line => console.log(line))
-    console.log('-'.repeat(80))
-    drawSolution(rows, solution)
-  }
-})
+const solveWorker = new Worker('./solveWorker.js', { type: 'module' })
 
-console.log(`solutions.length: ${solutions.length}`)
-console.log(`uniqueSolutions.length: ${uniqueSolutions.length}`)
+solveWorker.onmessage = e => {
+  switch (e.data.message) {
+    case 'solutionFound': {
+      const { rows, solution } = e.data
+      if (isSolutionUnique(rows, solution)) {
+        drawSolution(rows, solution)
+        const formattedSolution = formatSolution(rows, solution)
+        const joinedGrid = formattedSolution.join('|')
+        uniqueSolutions.push(solution)
+        uniqueJoinedGrids.push(joinedGrid)
+        formattedSolution.forEach(line => console.log(line))
+        console.log('-'.repeat(80))
+      }
+      break;
+    }
+    case 'done': {
+      const { solutions } = e.data
+      console.log(`solutions.length: ${solutions.length}`)
+      console.log(`uniqueSolutions.length: ${uniqueSolutions.length}`)
+      break
+    }
+  }
+}
