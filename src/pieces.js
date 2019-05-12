@@ -1,4 +1,5 @@
 import * as R from 'ramda'
+import * as M from './manipulations'
 import { pieceDescriptions } from './pieceDescriptions'
 
 function* patternToCoords(pattern) {
@@ -13,17 +14,6 @@ function* patternToCoords(pattern) {
   }
 }
 
-const rotate90CounterClockwise = pattern => {
-  const h = pattern.length
-  const w = pattern[0].length
-  const xs = R.range(0, w)
-  const ys = R.range(0, h)
-  return R.chain(x => R.join('', R.map(y => pattern[y][w - x - 1], ys)), xs)
-}
-
-const reflect = pattern =>
-  pattern.map(R.reverse)
-
 const findUniqueVariations = ({ label, pattern }) => {
   const north = {
     orientation: 'N',
@@ -33,37 +23,37 @@ const findUniqueVariations = ({ label, pattern }) => {
   const west = {
     orientation: 'W',
     reflected: false,
-    pattern: rotate90CounterClockwise(north.pattern)
+    pattern: M.rotateStrings(north.pattern)
   }
   const south = {
     orientation: 'S',
     reflected: false,
-    pattern: rotate90CounterClockwise(west.pattern)
+    pattern: M.rotateStrings(west.pattern)
   }
   const east = {
     orientation: 'E',
     reflected: false,
-    pattern: rotate90CounterClockwise(south.pattern)
+    pattern: M.rotateStrings(south.pattern)
   }
   const northReflected = {
     orientation: 'N',
     reflected: true,
-    pattern: reflect(north.pattern)
+    pattern: M.reflectStrings(north.pattern)
   }
   const westReflected = {
     orientation: 'W',
     reflected: true,
-    pattern: reflect(west.pattern)
+    pattern: M.reflectStrings(west.pattern)
   }
   const southReflected = {
     orientation: 'S',
     reflected: true,
-    pattern: reflect(south.pattern)
+    pattern: M.reflectStrings(south.pattern)
   }
   const eastReflected = {
     orientation: 'E',
     reflected: true,
-    pattern: reflect(east.pattern)
+    pattern: M.reflectStrings(east.pattern)
   }
   const allVariations = [
     north,
