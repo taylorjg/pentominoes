@@ -3,6 +3,7 @@ import * as R from 'ramda'
 import { pieces } from './pieces'
 
 const placementIsValid = placement => {
+  const location = placement.location
   for (const coords of placement.rotation.coords) {
     const x = location.x + coords.x
     const y = location.y + coords.y
@@ -42,15 +43,19 @@ const buildRows = () => {
   return placements.filter(placementIsValid)
 }
 
-const makePieceColumns = row => {
-  const pieceIndex = pieces.findIndex(piece => piece === row.piece)
+const makePieceColumns = placement => {
+  const pieceIndex = pieces.findIndex(piece => piece === placement.piece)
   return R.range(0, pieces.length)
     .map((_, index) => index === pieceIndex ? 1 : 0)
 }
 
-const makeLocationColumns = row => {
-  const locationIndices = row.rotation.coords.map(({ x, y }) =>
-    (row.location.y + y) * 8 + row.location.x + x)
+const makeLocationColumns = placement => {
+  const location = placement.location
+  const locationIndices = placement.rotation.coords.map(coords => {
+    const x = location.x + coords.x
+    const y = location.y + coords.y
+    return y * 8 + x
+  })
   const cols = R.range(0, 64)
     .map((_, index) => locationIndices.includes(index) ? 1 : 0)
   const excludeIndices = [27, 28, 35, 36]
