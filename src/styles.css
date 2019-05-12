@@ -8,5 +8,6 @@
 }
 
 .board {
-  border: 1px black solid;
+  display: block;
+  margin-bottom: 20px;
 }

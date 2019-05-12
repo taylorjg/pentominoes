@@ -13,7 +13,7 @@ const labelToColour = {
   Z: '#CCCA2A'
 }
 
-const createSvgElement = (elementName, additionalAttributes) => {
+const createSvgElement = (elementName, additionalAttributes = {}) => {
   const element = document.createElementNS('http://www.w3.org/2000/svg', elementName)
   Object.entries(additionalAttributes).forEach(([name, value]) =>
     element.setAttribute(name, value))
@@ -38,9 +38,14 @@ const drawPiece = (svgElement, placement) => {
 }
 
 export const drawSolution = (rows, solution) => {
-  const svgElement = document.getElementById('board')
+  const svgElement = createSvgElement('svg')
+  svgElement.style.width = 200
+  svgElement.style.height = 200
+  svgElement.setAttribute('class', 'board')
   solution.forEach(rowIndex => {
     const row = rows[rowIndex]
     drawPiece(svgElement, row)
   })
+  const solutionsElement = document.getElementById('solutions')
+  solutionsElement.appendChild(svgElement)
 }

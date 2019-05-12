@@ -21,7 +21,7 @@ const rotate90CounterClockwise = pattern => {
   return R.chain(x => R.join('', R.map(y => pattern[y][w - x - 1], ys)), xs)
 }
 
-const rotations = ({ label, pattern }) => {
+const uniqueRotations = ({ label, pattern }) => {
   const north = {
     orientation: 'N',
     pattern
@@ -39,13 +39,16 @@ const rotations = ({ label, pattern }) => {
     pattern: rotate90CounterClockwise(south.pattern)
   }
   const patternOrientations = [north, south, east, west]
+  const uniquePatternOrientations = R.uniqBy(
+    orientation => orientation.pattern.join('|'),
+    patternOrientations)
   return {
     label,
-    rotations: patternOrientations.map(({ orientation, pattern }) => ({
+    rotations: uniquePatternOrientations.map(({ orientation, pattern }) => ({
       orientation,
       coords: Array.from(patternToCoords(pattern))
     }))
   }
 }
 
-export const pieces = pieceDescriptions.map(rotations)
+export const pieces = pieceDescriptions.map(uniqueRotations)

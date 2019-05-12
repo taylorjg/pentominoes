@@ -1,6 +1,5 @@
 import { solve } from './solve'
 import { drawSolution } from './svg'
 
-const { rows, solutions } = solve()
+const { solutions } = solve((rows, solution) => drawSolution(rows, solution))
 console.log(`solutions.length: ${solutions.length}`)
-solutions.forEach(solution => drawSolution(rows, solution))
