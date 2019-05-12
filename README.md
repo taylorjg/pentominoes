@@ -9,7 +9,8 @@
   * ~~Should have 1568 rows leading to 65 solutions~~
   * ~~Need to consider transpositions~~
     * ~~See https://www-cs-faculty.stanford.edu/~knuth/programs/polyominoes.w~~
-* Still getting wrong number of solutions (520 instead of 65!)    
+* ~~Still getting wrong number of solutions (520 instead of 65!)~~
+  * ~~Ignore solutions that are merely rotations or transpositions of other solutions~~
 * Display the solutions in a grid
   * Make the grid responsive
 * Use a web worker to do the solving ?
