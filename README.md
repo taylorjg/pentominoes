@@ -11,9 +11,12 @@
     * ~~See https://www-cs-faculty.stanford.edu/~knuth/programs/polyominoes.w~~
 * ~~Still getting wrong number of solutions (520 instead of 65!)~~
   * ~~Ignore solutions that are merely rotations or transpositions of other solutions~~
+* ~~Do the solving using a web worker~~
 * Display the solutions in a grid
   * Make the grid responsive
-* ~~Do the solving using a web worker~~
+* Improve rendering of solutions
+  * Rounded corners
+  * Borders  
 
 # Links
 
