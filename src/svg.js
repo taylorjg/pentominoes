@@ -23,7 +23,7 @@ const createSvgElement = (elementName, additionalAttributes = {}) => {
 const drawPiece = (svgElement, placement) => {
   const colour = labelToColour[placement.piece.label]
   const location = placement.location
-  placement.rotation.coords.forEach(coords => {
+  placement.variation.coords.forEach(coords => {
     const x = location.x + coords.x
     const y = location.y + coords.y
     const rect = createSvgElement('rect', {

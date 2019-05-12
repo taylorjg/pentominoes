@@ -2,11 +2,9 @@ import * as dlxlib from 'dlxlib'
 import * as R from 'ramda'
 import { pieces } from './pieces'
 
-console.dir(pieces)
-
 const placementIsValid = placement => {
   const location = placement.location
-  for (const coords of placement.rotation.coords) {
+  for (const coords of placement.variation.coords) {
     const x = location.x + coords.x
     const y = location.y + coords.y
     if (x >= 8 || y >= 8) return false
@@ -28,11 +26,11 @@ function* genLocations() {
 function* genPlacements() {
   const locations = Array.from(genLocations())
   for (const piece of pieces) {
-    for (const rotation of piece.rotations) {
+    for (const variation of piece.variations) {
       for (const location of locations) {
         yield {
           piece,
-          rotation,
+          variation,
           location
         }
       }
@@ -53,7 +51,7 @@ const makePieceColumns = placement => {
 
 const makeLocationColumns = placement => {
   const location = placement.location
-  const locationIndices = placement.rotation.coords.map(coords => {
+  const locationIndices = placement.variation.coords.map(coords => {
     const x = location.x + coords.x
     const y = location.y + coords.y
     return y * 8 + x
@@ -76,9 +74,10 @@ const dumpSolution = (rows, solution) => {
     const row = rows[rowIndex]
     const label = `label: ${row.piece.label}`
     const location = `location: ${JSON.stringify(row.location)}`
-    const orientation = `orientation: ${row.rotation.orientation}`
-    const coords = `coords: ${JSON.stringify(row.rotation.coords)}`
-    console.log([label, location, orientation, coords].join('; '))
+    const orientation = `orientation: ${row.variation.orientation}`
+    const reflected = `reflected: ${row.variation.reflected}`
+    const coords = `coords: ${JSON.stringify(row.variation.coords)}`
+    console.log([label, location, orientation, reflected, coords].join('; '))
   })
   console.log('-'.repeat(80))
 }
