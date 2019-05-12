@@ -69,16 +69,37 @@ const buildMatrix = rows =>
     return R.concat(pieceColumns, locationColumns)
   })
 
-const dumpSolution = (rows, solution) => {
+const formatSolution = (rows, solution) => {
+  const cells = R.range(0, 8).map(() => Array(8))
+  cells[3][3] = ' '
+  cells[3][4] = ' '
+  cells[4][3] = ' '
+  cells[4][4] = ' '
   solution.forEach(rowIndex => {
-    const row = rows[rowIndex]
-    const label = `label: ${row.piece.label}`
-    const location = `location: ${JSON.stringify(row.location)}`
-    const orientation = `orientation: ${row.variation.orientation}`
-    const reflected = `reflected: ${row.variation.reflected}`
-    const coords = `coords: ${JSON.stringify(row.variation.coords)}`
-    console.log([label, location, orientation, reflected, coords].join('; '))
+    const placement = rows[rowIndex]
+    const location = placement.location
+    for (const coords of placement.variation.coords) {
+      const x = location.x + coords.x
+      const y = location.y + coords.y
+      cells[y][x] = placement.piece.label
+    }
   })
+  return cells.map(row => row.join(''))
+}
+
+const dumpSolution = (rows, solution) => {
+  // solution.forEach(rowIndex => {
+  //   const row = rows[rowIndex]
+  //   const label = `label: ${row.piece.label}`
+  //   const location = `location: ${JSON.stringify(row.location)}`
+  //   const orientation = `orientation: ${row.variation.orientation}`
+  //   const reflected = `reflected: ${row.variation.reflected}`
+  //   const coords = `coords: ${JSON.stringify(row.variation.coords)}`
+  //   console.log([label, location, orientation, reflected, coords].join('; '))
+  // })
+  // console.log('-'.repeat(80))
+  const formattedSolution = formatSolution(rows, solution)
+  formattedSolution.forEach(line => console.log(line))
   console.log('-'.repeat(80))
 }
 
