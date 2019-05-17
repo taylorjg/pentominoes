@@ -40,6 +40,12 @@ const reverseLine = line => ({
   }
 })
 
+const lineDirection = ({ p1, p2 }) => {
+  if (samePoint(p1, p2)) throw new Error('Line is borked')
+  if (p1.x === p2.x) return p1.y < p2.y ? 'D' : 'U'
+  if (p1.y === p2.y) return p1.x < p2.x ? 'R' : 'L'
+}
+
 const calculateLines = (location, variation) =>
   R.chain(
     coords => {
@@ -50,10 +56,10 @@ const calculateLines = (location, variation) =>
       const br = { x: x + 1, y: y + 1 }
       const bl = { x, y: y + 1 }
       return [
-        { p1: tl, p2: tr, type: 'R' },
-        { p1: tr, p2: br, type: 'D' },
-        { p1: bl, p2: br, type: 'R' },
-        { p1: tl, p2: bl, type: 'D' }
+        { p1: tl, p2: tr },
+        { p1: tr, p2: br },
+        { p1: bl, p2: br },
+        { p1: tl, p2: bl }
       ]
     },
     variation.coords)
@@ -65,7 +71,7 @@ const eliminateDuplicateLines = lines => {
 
 const orderLines = lines => {
   let currentLine = lines
-    .filter(line => line.type === 'R')
+    .filter(line => lineDirection(line) === 'R')
     .reduce((acc, line) => line.p1.y < acc.p1.y || (line.p1.y === acc.p1.y && line.p1.x < acc.p1.x) ? line : acc)
   const startingPoint = currentLine.p1
   let otherPoint = currentLine.p2
@@ -83,10 +89,26 @@ const orderLines = lines => {
 }
 
 const consolidateLines = lines => {
-  // TODO:
-  // - combine adjacent R lines
-  // - combine adjacent D lines
-  return lines
+  const result = []
+  const furthestLineIndexMaintainingDirection = (originalDirection, fromLineIndex) => {
+    for (let lineIndex = fromLineIndex + 1; lineIndex < lines.length; lineIndex++) {
+      const nextLine = lines[lineIndex]
+      const nextDirection = lineDirection(nextLine)
+      if (nextDirection !== originalDirection) {
+        return lineIndex
+      }
+    }
+    return 0
+  }
+  for (let lineIndex = 0; lineIndex < lines.length;) {
+    const line = lines[lineIndex]
+    const p1 = line.p1
+    lineIndex = furthestLineIndexMaintainingDirection(lineDirection(line), lineIndex)
+    const p2 = lines[lineIndex].p1
+    result.push({ p1, p2 })
+    if (lineIndex === 0) break
+  }
+  return result
 }
 
 const toSvgCoords = size => lines =>
@@ -101,24 +123,37 @@ const toSvgCoords = size => lines =>
     }
   }))
 
-const toPath = lines => {
-  const points = lines.map(line => line.p1)
-  const p0 = R.head(points)
-  const ps = R.tail(points)
-  return `
-    M${p0.x},${p0.y}
-    ${ps.map(p => `L${p.x},${p.y}`).join(' ')}
-    Z
-  `
-}
+// const toPath = lines => {
+//   const points = lines.map(line => line.p1)
+//   const p0 = R.head(points)
+//   const ps = R.tail(points)
+//   return `
+//     M${p0.x},${p0.y}
+//     ${ps.map(p => `L${p.x},${p.y}`).join(' ')}
+//     Z
+//   `
+// }
 
-const createPathElementForPiece = (piece, lines) => {
+// const createPathElementForPiece = (piece, lines) => {
+//   const colour = labelToColour[piece.label]
+//   return createSvgElement('path', {
+//     d: toPath(lines),
+//     fill: colour,
+//     'stroke': 'black',
+//     'stroke-width': 2
+//   })
+// }
+
+const createPolylineElementForPiece = (piece, lines) => {
   const colour = labelToColour[piece.label]
-  return createSvgElement('path', {
-    d: toPath(lines),
+  const points = lines.map(line => line.p1)
+  const closedPoints = R.append(R.head(points), points)
+  return createSvgElement('polyline', {
+    points: closedPoints.map(p => `${p.x},${p.y}`).join(' '),
     fill: colour,
     'stroke': 'black',
-    'stroke-width': 2
+    'stroke-width': 2,
+    'stroke-linejoin': 'round'
   })
 }
 
@@ -149,7 +184,7 @@ export const drawSolution = (rows, solution) => {
   svgElement.style.height = svgElement.getBoundingClientRect().width
   solution.forEach(rowIndex => {
     const placement = rows[rowIndex]
-    const pathElement = createPathElementForPiece(
+    const pathElement = createPolylineElementForPiece(
       placement.piece,
       R.pipe(
         calculateLines,
