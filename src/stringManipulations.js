@@ -5,7 +5,7 @@ export const rotateStrings = strings => {
   const w = strings[0].length
   const xs = R.range(0, w)
   const ys = R.range(0, h)
-  const reversedStrings = strings.map(R.reverse)
+  const reversedStrings = reflectStrings(strings)
   return R.chain(x => R.join('', R.map(y => reversedStrings[y][x], ys)), xs)
 }
 

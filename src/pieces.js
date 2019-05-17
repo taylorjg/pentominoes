@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import * as M from './manipulations'
+import * as M from './stringManipulations'
 import { pieceDescriptions } from './pieceDescriptions'
 
 function* patternToCoords(pattern) {

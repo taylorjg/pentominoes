@@ -1,5 +1,5 @@
 import * as R from 'ramda'
-import * as M from './manipulations'
+import * as M from './stringManipulations'
 import { drawSolution } from './svg'
 
 const formatSolution = (rows, solution) => {
@@ -23,7 +23,7 @@ const formatSolution = (rows, solution) => {
 const uniqueSolutions = []
 const uniqueJoinedGrids = []
 
-const isSolutionUnique = (rows, solution) => {
+const solutionIsUnique = (rows, solution) => {
   const formattedSolution1 = formatSolution(rows, solution)
   const formattedSolution2 = M.rotateStrings(formattedSolution1)
   const formattedSolution3 = M.rotateStrings(formattedSolution2)
@@ -48,10 +48,12 @@ const isSolutionUnique = (rows, solution) => {
 const solveWorker = new Worker('./solveWorker.js', { type: 'module' })
 
 solveWorker.onmessage = e => {
+  
   switch (e.data.message) {
+
     case 'solutionFound': {
       const { rows, solution } = e.data
-      if (isSolutionUnique(rows, solution)) {
+      if (solutionIsUnique(rows, solution)) {
         drawSolution(rows, solution)
         const formattedSolution = formatSolution(rows, solution)
         const joinedGrid = formattedSolution.join('|')
@@ -62,6 +64,7 @@ solveWorker.onmessage = e => {
       }
       break;
     }
+
     case 'done': {
       const { solutions } = e.data
       console.log(`solutions.length: ${solutions.length}`)
