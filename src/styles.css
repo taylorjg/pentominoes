@@ -16,5 +16,11 @@
 
 .piece {
   stroke: black;
-  stroke-width: 2;
+  stroke-width: 1;
+}
+
+.unfilled-boundary {
+  stroke: black;
+  stroke-width: 1;
+  fill: none;
 }

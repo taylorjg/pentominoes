@@ -45,7 +45,7 @@ const lineDirection = ({ p1, p2 }) => {
   if (p1.y === p2.y) return p1.x < p2.x ? 'R' : 'L'
 }
 
-const calculateLines = (location, variation) =>
+const calculateLines = (location, coords) =>
   R.chain(
     coords => {
       const x = location.x + coords.x
@@ -61,7 +61,7 @@ const calculateLines = (location, variation) =>
         { p1: tl, p2: bl }
       ]
     },
-    variation.coords)
+    coords)
 
 const eliminateDuplicateLines = lines => {
   const countOccurrencesOfLine = line1 => lines.filter(line2 => sameLine(line1, line2)).length
@@ -128,15 +128,45 @@ const toSvgCoords = size => lines =>
 // - x-axis-rotation: 0
 // - large-arc-flag: 0
 // - sweep-flag: 0 or 1 depending on direction
+
+const GAP = 2
+const HALF_GAP = GAP / 2
+
 const toSvgPath = lines => {
-  const points = lines.map(line => line.p1)
+  const calculatePoints = line => {
+    const { p1, p2 } = line
+    switch (lineDirection(line)) {
+      case 'R':
+        return [
+          { x: p1.x + GAP, y: p1.y + HALF_GAP },
+          { x: p2.x - GAP, y: p2.y + HALF_GAP }
+        ]
+      case 'D':
+        return [
+          { x: p1.x - HALF_GAP, y: p1.y + GAP },
+          { x: p2.x - HALF_GAP, y: p2.y - GAP }
+        ]
+      case 'L':
+        return [
+          { x: p1.x - GAP, y: p1.y - HALF_GAP },
+          { x: p2.x + GAP, y: p2.y - HALF_GAP }
+        ]
+      case 'U':
+        return [
+          { x: p1.x + HALF_GAP, y: p1.y - GAP },
+          { x: p2.x + HALF_GAP, y: p2.y + GAP }
+        ]
+    }
+  }
+  const points = R.chain(calculatePoints, lines)
   const p0 = R.head(points)
   const ps = R.tail(points)
-  return `
-    M${p0.x},${p0.y}
-    ${ps.map(p => `L${p.x},${p.y}`).join(' ')}
-    Z
-  `
+  const bits = [
+    `M${p0.x},${p0.y}`,
+    `${ps.map(p => `L${p.x},${p.y}`).join(' ')}`,
+    `Z`
+  ]
+  return bits.join(' ')
 }
 
 const createPathElementForPiece = (piece, lines) => {
@@ -145,6 +175,13 @@ const createPathElementForPiece = (piece, lines) => {
     d: toSvgPath(lines),
     fill: colour,
     'class': 'piece'
+  })
+}
+
+const createPathElementForUnfilledBoundary = (size, lines) => {
+  return createSvgElement('path', {
+    d: toSvgPath(toSvgCoords(size)(lines)),
+    'class': 'unfilled-boundary'
   })
 }
 
@@ -171,7 +208,21 @@ export const drawSolution = (rows, solution) => {
         orderLines,
         consolidateLines,
         toSvgCoords(size)
-      )(placement.location, placement.variation))
+      )(placement.location, placement.variation.coords))
     svgElement.appendChild(pathElement)
   })
+  const holeBoundary = createPathElementForUnfilledBoundary(size, [
+    { p1: { x: 3, y: 3 }, p2: { x: 5, y: 3 } },
+    { p1: { x: 5, y: 3 }, p2: { x: 5, y: 5 } },
+    { p1: { x: 5, y: 5 }, p2: { x: 3, y: 5 } },
+    { p1: { x: 3, y: 5 }, p2: { x: 3, y: 3 } }
+  ])
+  svgElement.appendChild(holeBoundary)
+  // const outerBoundary = createPathElementForUnfilledBoundary(size, [
+  //   { p1: { x: 0, y: 0 }, p2: { x: 8, y: 0 } },
+  //   { p1: { x: 8, y: 0 }, p2: { x: 8, y: 8 } },
+  //   { p1: { x: 8, y: 8 }, p2: { x: 0, y: 8 } },
+  //   { p1: { x: 0, y: 8 }, p2: { x: 0, y: 0 } }
+  // ])
+  // svgElement.appendChild(outerBoundary)
 }
