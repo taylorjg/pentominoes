@@ -1,6 +1,6 @@
 {
   "name": "pentominoes",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Solve Dana Scott's pentomino problem using Donald E Knuth's DLX (Dancing Links)",
   "main": "index.js",
   "scripts": {

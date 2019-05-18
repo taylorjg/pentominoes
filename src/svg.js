@@ -193,18 +193,14 @@ const createPathElementForUnfilledBoundary = (size, lines) => {
 }
 
 export const drawSolution = (rows, solution) => {
-  const size = 400
   const boardWrapperElement = document.createElement('div')
   boardWrapperElement.setAttribute('class', 'board-wrapper')
-  const svgElement = createSvgElement('svg', {
-    // 'width': '50%'
-    'width': size,
-    'height': size
-  })
+  const svgElement = createSvgElement('svg', { 'class': 'board' })
   boardWrapperElement.appendChild(svgElement)
   const solutionsElement = document.getElementById('solutions')
   solutionsElement.appendChild(boardWrapperElement)
-  svgElement.style.height = svgElement.getBoundingClientRect().width
+  const width = svgElement.getBoundingClientRect().width
+  svgElement.style.height = width
   solution.forEach(rowIndex => {
     const placement = rows[rowIndex]
     const pathElement = createPathElementForPiece(
@@ -214,11 +210,11 @@ export const drawSolution = (rows, solution) => {
         eliminateDuplicateLines,
         orderLines,
         consolidateLines,
-        toSvgCoords(size)
+        toSvgCoords(width)
       )(placement.location, placement.variation.coords))
     svgElement.appendChild(pathElement)
   })
-  const holeBoundary = createPathElementForUnfilledBoundary(size, [
+  const holeBoundary = createPathElementForUnfilledBoundary(width, [
     { p1: { x: 3, y: 3 }, p2: { x: 5, y: 3 } },
     { p1: { x: 5, y: 3 }, p2: { x: 5, y: 5 } },
     { p1: { x: 5, y: 5 }, p2: { x: 3, y: 5 } },
