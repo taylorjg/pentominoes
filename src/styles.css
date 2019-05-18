@@ -17,10 +17,12 @@
 .piece {
   stroke: black;
   stroke-width: 1;
+  stroke-linejoin: round;
 }
 
 .unfilled-boundary {
   stroke: black;
   stroke-width: 1;
+  stroke-linejoin: round;
   fill: none;
 }

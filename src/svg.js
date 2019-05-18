@@ -57,8 +57,8 @@ const calculateLines = (location, coords) =>
       return [
         { p1: tl, p2: tr },
         { p1: tr, p2: br },
-        { p1: bl, p2: br },
-        { p1: tl, p2: bl }
+        { p1: br, p2: bl },
+        { p1: bl, p2: tl }
       ]
     },
     coords)
@@ -121,14 +121,6 @@ const toSvgCoords = size => lines =>
     }
   }))
 
-// Later, for rounded corners:
-// - bring in ends of lines slightly
-// - introduce an ARC between each pair of lines
-// - https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
-// - x-axis-rotation: 0
-// - large-arc-flag: 0
-// - sweep-flag: 0 or 1 depending on direction
-
 const GAP = 2
 const HALF_GAP = GAP / 2
 
@@ -160,10 +152,25 @@ const toSvgPath = lines => {
   }
   const points = R.chain(calculatePoints, lines)
   const p0 = R.head(points)
-  const ps = R.tail(points)
+  const ps = R.append(p0, R.tail(points))
   const bits = [
     `M${p0.x},${p0.y}`,
-    `${ps.map(p => `L${p.x},${p.y}`).join(' ')}`,
+    ps.map((p, index) => {
+      if (index % 2 === 0) {
+        return `L${p.x},${p.y}`
+      } else {
+        const xAxisRotation = 0
+        const largeArcFlag = 0
+        const beforeLineIndex = (index - 1) / 2
+        const afterLineIndex = (beforeLineIndex + 1) % lines.length
+        const beforeLine = lines[beforeLineIndex]
+        const afterLine = lines[afterLineIndex]
+        const directions = lineDirection(beforeLine) + lineDirection(afterLine)
+        const sweepFlag = ['RD', 'DL', 'LU', 'UR'].includes(directions) ? 1 : 0
+        const r = sweepFlag ? HALF_GAP : GAP * 2
+        return `A${r},${r},${xAxisRotation},${largeArcFlag},${sweepFlag},${p.x},${p.y}`
+      }
+    }).join(' '),
     `Z`
   ]
   return bits.join(' ')
