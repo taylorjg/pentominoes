@@ -2,6 +2,8 @@ import * as R from 'ramda'
 import * as M from './stringManipulations'
 import { drawSolution } from './svg'
 
+// TODO: use nested reduce calls to make this functional
+// see https://github.com/taylorjg/pentominoes-cs/blob/master/PentominoesLib/Pentominoes.cs#L54-L74
 const formatSolution = (rows, solution) => {
   const cells = R.range(0, 8).map(() => Array(8))
   cells[3][3] = ' '
@@ -47,6 +49,8 @@ const solutionIsUnique = (rows, solution) => {
 
 const solveWorker = new Worker('./solveWorker.js', { type: 'module' })
 
+// TODO: could use RxJS scan ?
+// https://rxjs.dev/api/operators/scan
 solveWorker.onmessage = e => {
   
   switch (e.data.message) {

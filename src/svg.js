@@ -41,7 +41,6 @@ const reverseLine = line => ({
 })
 
 const lineDirection = ({ p1, p2 }) => {
-  if (samePoint(p1, p2)) throw new Error('Line is borked')
   if (p1.x === p2.x) return p1.y < p2.y ? 'D' : 'U'
   if (p1.y === p2.y) return p1.x < p2.x ? 'R' : 'L'
 }
@@ -69,12 +68,11 @@ const eliminateDuplicateLines = lines => {
   return lines.filter(line => countOccurrencesOfLine(line) === 1)
 }
 
+// TODO: use recursion to make this functional
 const orderLines = lines => {
-  let currentLine = lines
-    .filter(line => lineDirection(line) === 'R')
-    .reduce((acc, line) => line.p1.y < acc.p1.y || (line.p1.y === acc.p1.y && line.p1.x < acc.p1.x) ? line : acc)
-  const startingPoint = currentLine.p1
+  let currentLine = lines[0]
   let otherPoint = currentLine.p2
+  const startingPoint = currentLine.p1
   const results = [currentLine]
   for (; ;) {
     if (samePoint(otherPoint, startingPoint)) break
@@ -123,51 +121,32 @@ const toSvgCoords = size => lines =>
     }
   }))
 
-// const toPath = lines => {
-//   const points = lines.map(line => line.p1)
-//   const p0 = R.head(points)
-//   const ps = R.tail(points)
-//   return `
-//     M${p0.x},${p0.y}
-//     ${ps.map(p => `L${p.x},${p.y}`).join(' ')}
-//     Z
-//   `
-// }
-
-// const createPathElementForPiece = (piece, lines) => {
-//   const colour = labelToColour[piece.label]
-//   return createSvgElement('path', {
-//     d: toPath(lines),
-//     fill: colour,
-//     'stroke': 'black',
-//     'stroke-width': 2
-//   })
-// }
-
-const createPolylineElementForPiece = (piece, lines) => {
-  const colour = labelToColour[piece.label]
-  const points = lines.map(line => line.p1)
-  const closedPoints = R.append(R.head(points), points)
-  return createSvgElement('polyline', {
-    points: closedPoints.map(p => `${p.x},${p.y}`).join(' '),
-    fill: colour,
-    'stroke': 'black',
-    'stroke-width': 2,
-    'stroke-linejoin': 'round'
-  })
-}
-
 // Later, for rounded corners:
 // - bring in ends of lines slightly
 // - introduce an ARC between each pair of lines
 // - https://www.w3.org/TR/SVG/paths.html#PathDataEllipticalArcCommands
 // - x-axis-rotation: 0
 // - large-arc-flag: 0
-// - sweep-flag: 0 or 1
-//
-// OR
-//
-// use a <poyline> ?
+// - sweep-flag: 0 or 1 depending on direction
+const toSvgPath = lines => {
+  const points = lines.map(line => line.p1)
+  const p0 = R.head(points)
+  const ps = R.tail(points)
+  return `
+    M${p0.x},${p0.y}
+    ${ps.map(p => `L${p.x},${p.y}`).join(' ')}
+    Z
+  `
+}
+
+const createPathElementForPiece = (piece, lines) => {
+  const colour = labelToColour[piece.label]
+  return createSvgElement('path', {
+    d: toSvgPath(lines),
+    fill: colour,
+    'class': 'piece'
+  })
+}
 
 export const drawSolution = (rows, solution) => {
   const size = 400
@@ -184,7 +163,7 @@ export const drawSolution = (rows, solution) => {
   svgElement.style.height = svgElement.getBoundingClientRect().width
   solution.forEach(rowIndex => {
     const placement = rows[rowIndex]
-    const pathElement = createPolylineElementForPiece(
+    const pathElement = createPathElementForPiece(
       placement.piece,
       R.pipe(
         calculateLines,

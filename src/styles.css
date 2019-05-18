@@ -13,3 +13,8 @@
   display: flex;
   justify-content: center;
 }
+
+.piece {
+  stroke: black;
+  stroke-width: 2;
+}
