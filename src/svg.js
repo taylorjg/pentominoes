@@ -126,53 +126,31 @@ const HALF_GAP = GAP / 2
 
 const toSvgPath = lines => {
   const isInnerArc = index => {
-    const line1 = lines[index]
-    const line2 = lines[(index + 1) % lines.length]
-    const directions = lineDirection(line1) + lineDirection(line2)
+    const thisLine = lines[index]
+    const nextLine = lines[(index + 1) % lines.length]
+    const directions = lineDirection(thisLine) + lineDirection(nextLine)
     return ['RD', 'DL', 'LU', 'UR'].includes(directions)
   }
   const calculatePoint1 = (line, index) => {
     const innerArc = isInnerArc(index === 0 ? lines.length - 1 : index - 1)
+    const gap = innerArc ? GAP : 0
     const { p1 } = line
     switch (lineDirection(line)) {
-      case 'R':
-        return innerArc
-          ? { x: p1.x + GAP, y: p1.y + HALF_GAP }
-          : { x: p1.x, y: p1.y + HALF_GAP }
-      case 'D':
-        return innerArc
-          ? { x: p1.x - HALF_GAP, y: p1.y + GAP }
-          : { x: p1.x - HALF_GAP, y: p1.y }
-      case 'L':
-        return innerArc
-          ? { x: p1.x - GAP, y: p1.y - HALF_GAP }
-          : { x: p1.x, y: p1.y - HALF_GAP }
-      case 'U':
-        return innerArc
-          ? { x: p1.x + HALF_GAP, y: p1.y - GAP }
-          : { x: p1.x + HALF_GAP, y: p1.y }
+      case 'R': return { x: p1.x + gap, y: p1.y + HALF_GAP }
+      case 'D': return { x: p1.x - HALF_GAP, y: p1.y + gap }
+      case 'L': return { x: p1.x - gap, y: p1.y - HALF_GAP }
+      case 'U': return { x: p1.x + HALF_GAP, y: p1.y - gap }
     }
   }
   const calculatePoint2 = (line, index) => {
     const innerArc = isInnerArc(index)
+    const gap = innerArc ? GAP : 0
     const { p2 } = line
     switch (lineDirection(line)) {
-      case 'R':
-        return innerArc
-          ? { x: p2.x - GAP, y: p2.y + HALF_GAP }
-          : { x: p2.x, y: p2.y + HALF_GAP }
-      case 'D':
-        return innerArc
-          ? { x: p2.x - HALF_GAP, y: p2.y - GAP }
-          : { x: p2.x - HALF_GAP, y: p2.y }
-      case 'L':
-        return innerArc
-          ? { x: p2.x + GAP, y: p2.y - HALF_GAP }
-          : { x: p2.x, y: p2.y - HALF_GAP }
-      case 'U':
-        return innerArc
-          ? { x: p2.x + HALF_GAP, y: p2.y + GAP }
-          : { x: p2.x + HALF_GAP, y: p2.y }
+      case 'R': return { x: p2.x - gap, y: p2.y + HALF_GAP }
+      case 'D': return { x: p2.x - HALF_GAP, y: p2.y - gap }
+      case 'L': return { x: p2.x + gap, y: p2.y - HALF_GAP }
+      case 'U': return { x: p2.x + HALF_GAP, y: p2.y + gap }
     }
   }
   const calculatePoints = (line, index) => [
