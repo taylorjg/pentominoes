@@ -125,55 +125,76 @@ const GAP = 2
 const HALF_GAP = GAP / 2
 
 const toSvgPath = lines => {
-  const calculatePoints = line => {
-    const { p1, p2 } = line
+  const isInnerArc = index => {
+    const line1 = lines[index]
+    const line2 = lines[(index + 1) % lines.length]
+    const directions = lineDirection(line1) + lineDirection(line2)
+    return ['RD', 'DL', 'LU', 'UR'].includes(directions)
+  }
+  const calculatePoint1 = (line, index) => {
+    const innerArc = isInnerArc(index === 0 ? lines.length - 1 : index - 1)
+    const { p1 } = line
     switch (lineDirection(line)) {
       case 'R':
-        return [
-          { x: p1.x + GAP, y: p1.y + HALF_GAP },
-          { x: p2.x - GAP, y: p2.y + HALF_GAP }
-        ]
+        return innerArc
+          ? { x: p1.x + GAP, y: p1.y + HALF_GAP }
+          : { x: p1.x, y: p1.y + HALF_GAP }
       case 'D':
-        return [
-          { x: p1.x - HALF_GAP, y: p1.y + GAP },
-          { x: p2.x - HALF_GAP, y: p2.y - GAP }
-        ]
+        return innerArc
+          ? { x: p1.x - HALF_GAP, y: p1.y + GAP }
+          : { x: p1.x - HALF_GAP, y: p1.y }
       case 'L':
-        return [
-          { x: p1.x - GAP, y: p1.y - HALF_GAP },
-          { x: p2.x + GAP, y: p2.y - HALF_GAP }
-        ]
+        return innerArc
+          ? { x: p1.x - GAP, y: p1.y - HALF_GAP }
+          : { x: p1.x, y: p1.y - HALF_GAP }
       case 'U':
-        return [
-          { x: p1.x + HALF_GAP, y: p1.y - GAP },
-          { x: p2.x + HALF_GAP, y: p2.y + GAP }
-        ]
+        return innerArc
+          ? { x: p1.x + HALF_GAP, y: p1.y - GAP }
+          : { x: p1.x + HALF_GAP, y: p1.y }
     }
   }
-  const points = R.chain(calculatePoints, lines)
+  const calculatePoint2 = (line, index) => {
+    const innerArc = isInnerArc(index)
+    const { p2 } = line
+    switch (lineDirection(line)) {
+      case 'R':
+        return innerArc
+          ? { x: p2.x - GAP, y: p2.y + HALF_GAP }
+          : { x: p2.x, y: p2.y + HALF_GAP }
+      case 'D':
+        return innerArc
+          ? { x: p2.x - HALF_GAP, y: p2.y - GAP }
+          : { x: p2.x - HALF_GAP, y: p2.y }
+      case 'L':
+        return innerArc
+          ? { x: p2.x + GAP, y: p2.y - HALF_GAP }
+          : { x: p2.x, y: p2.y - HALF_GAP }
+      case 'U':
+        return innerArc
+          ? { x: p2.x + HALF_GAP, y: p2.y + GAP }
+          : { x: p2.x + HALF_GAP, y: p2.y }
+    }
+  }
+  const calculatePoints = (line, index) => [
+    calculatePoint1(line, index),
+    calculatePoint2(line, index)
+  ]
+  const points = R.addIndex(R.chain)(calculatePoints, lines)
   const p0 = R.head(points)
   const ps = R.append(p0, R.tail(points))
-  const bits = [
+  const commands = [
     `M${p0.x},${p0.y}`,
-    ps.map((p, index) => {
+    ...ps.map((p, index) => {
       if (index % 2 === 0) {
         return `L${p.x},${p.y}`
       } else {
-        const xAxisRotation = 0
-        const largeArcFlag = 0
-        const beforeLineIndex = (index - 1) / 2
-        const afterLineIndex = (beforeLineIndex + 1) % lines.length
-        const beforeLine = lines[beforeLineIndex]
-        const afterLine = lines[afterLineIndex]
-        const directions = lineDirection(beforeLine) + lineDirection(afterLine)
-        const sweepFlag = ['RD', 'DL', 'LU', 'UR'].includes(directions) ? 1 : 0
-        const r = sweepFlag ? HALF_GAP : GAP * 2
-        return `A${r},${r},${xAxisRotation},${largeArcFlag},${sweepFlag},${p.x},${p.y}`
+        const sweepFlag = isInnerArc((index - 1) / 2) ? 1 : 0
+        return `A${HALF_GAP},${HALF_GAP},0,0,${sweepFlag},${p.x},${p.y}`
       }
-    }).join(' '),
+    }),
     `Z`
   ]
-  return bits.join(' ')
+  return commands.join(' ')
 }
 
 const createPathElementForPiece = (piece, lines) => {
@@ -221,6 +242,31 @@ export const drawSolution = (rows, solution) => {
     { p1: { x: 3, y: 5 }, p2: { x: 3, y: 3 } }
   ])
   svgElement.appendChild(holeBoundary)
+
+  // for (const y of R.range(0, 9)) {
+  //   const horizontalGridLine = createSvgElement('line', {
+  //     x1: 0,
+  //     y1: y * width / 8,
+  //     x2: width,
+  //     y2: y * width / 8,
+  //     'stroke': 'black',
+  //     'stroke-width': .5
+  //   })
+  //   svgElement.appendChild(horizontalGridLine)
+  // }
+
+  // for (const x of R.range(0, 9)) {
+  //   const verticalGridLine = createSvgElement('line', {
+  //     x1: x * width / 8,
+  //     y1: 0,
+  //     x2: x * width / 8,
+  //     y2: width,
+  //     'stroke': 'black',
+  //     'stroke-width': .5
+  //   })
+  //   svgElement.appendChild(verticalGridLine)
+  // }
+
   // const outerBoundary = createPathElementForUnfilledBoundary(size, [
   //   { p1: { x: 0, y: 0 }, p2: { x: 8, y: 0 } },
   //   { p1: { x: 8, y: 0 }, p2: { x: 8, y: 8 } },
