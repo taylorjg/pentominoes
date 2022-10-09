@@ -1,0 +1,38 @@
+.container {
+  margin-top: 20px;
+}
+
+.version {
+  font-size: small;
+  font-style: italic;
+}
+
+.board-wrapper {
+  margin-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.board {
+  width: 25%;
+}
+
+@media (max-width: 768px) {
+  .board {
+    width: 100%;
+  }
+}
+
+.piece {
+  stroke: black;
+  stroke-width: 1;
+  stroke-linejoin: round;
+}
+
+.unfilled-boundary {
+  stroke: black;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  fill: none;
+}
