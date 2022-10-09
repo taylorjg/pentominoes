@@ -3,7 +3,7 @@
 * ~~Create basic structure~~
 * ~~Find first solution~~
 * ~~Draw first solution~~
-* ~~Deploy to Heroku~~
+* ~~Deploy to gh-pages~~
 * ~~Draw all solutions as they are found~~
 * ~~Fix bug regarding the building of the matrix~~
   * ~~Should have 1568 rows leading to 65 solutions~~
